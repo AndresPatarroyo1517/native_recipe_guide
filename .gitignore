@@ -2,6 +2,8 @@
 .DS_Store
 *.local
 *.log*
+*.expo
+.expo
 
 # Dist
 node_modules
