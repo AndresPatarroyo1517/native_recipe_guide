@@ -1,9 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import RecipeCard from "../components/RecipeCard";
+import { getCategories, getPlatosByFirstLetter, getPlatoById, getPlatoByName, getPlatosByCategory, getPlatoAleatorio, getPlatosAleatorios, getPlatosAleatoriosObligatorio, getListByType, getPlatosByIngredient, getPlatosByArea } from "../service/api";
 
 export default function HomeScreen() {
+
+  // Ejemplo para prueba de API (se puede borrar el useEffect)
+  useEffect(() => {
+    const fetchPlatos = async () => {
+      const data = await getPlatosByArea("canadian");
+      console.log(data)
+    };
+    fetchPlatos();
+  }, []);
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
