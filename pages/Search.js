@@ -17,7 +17,7 @@ import { useRecipes } from "../service/RecipesContext";
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width / 2 - 24;
 
-export default function SearchScreen() {
+export default function SearchScreen({ navigation }) { // ✅ recibir navigation
   const [query, setQuery] = useState("");
   const [ids, setIds] = useState([]);
   const { recipes, addRecipes, handleRate, handleToggleFavorite } = useRecipes();
@@ -51,6 +51,7 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* Barra de búsqueda */}
       <View style={styles.searchContainer}>
         <Search size={20} color="#888" style={styles.icon} />
         <TextInput
@@ -67,6 +68,7 @@ export default function SearchScreen() {
         )}
       </View>
 
+      {/* Lista de resultados */}
       {searchResults.length === 0 && query.length > 2 ? (
         <View style={styles.emptyBox}>
           <Text style={styles.noResults}>😔 No se encontraron resultados</Text>
@@ -87,6 +89,7 @@ export default function SearchScreen() {
                 {...item}
                 onRate={(newRating) => handleRate(item.id, newRating)}
                 onToggleFavorite={() => handleToggleFavorite(item.id)}
+                onPress={() => navigation.navigate("Detail", { id: item.id })} // ✅ Ahora abre el detalle
               />
             </View>
           )}

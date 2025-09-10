@@ -13,63 +13,68 @@ export default function RecipeCard({
   favorite,
   onRate,
   onToggleFavorite,
+  onPress, // ✅ recibimos la prop
 }) {
   return (
-    <View style={styles.card}>
-      <Image source={{ uri: image }} style={styles.image} />
+    <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
+      <View style={styles.card}>
+        <Image source={{ uri: image }} style={styles.image} />
 
-      <View style={styles.info}>
-        {/* fila superior: título + corazón */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
-          <TouchableOpacity
-            onPress={() => {
-              onToggleFavorite();
-              playSound("like"); 
-            }}
-          >
-            <AntDesign
-              name={favorite ? "heart" : "hearto"}
-              size={22}
-              color={favorite ? "red" : "gray"}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* fila intermedia: estrellas */}
-        <View style={styles.stars}>
-          {[1, 2, 3, 4, 5].map((star) => (
+        <View style={styles.info}>
+          {/* fila superior: título + corazón */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{title}</Text>
             <TouchableOpacity
-              key={star}
-              onPress={() => {
-                onRate(star);
-                playSound("star");
+              onPress={(e) => {
+                e.stopPropagation(); // evita que toque la card
+                onToggleFavorite();
+                playSound("like");
               }}
             >
               <AntDesign
-                name={star <= rating ? "star" : "staro"}
-                size={20}
-                color={star <= rating ? "#f5c518" : "gray"}
-                style={styles.star}
+                name={favorite ? "heart" : "hearto"}
+                size={22}
+                color={favorite ? "red" : "gray"}
               />
             </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* fila inferior: personas + tiempo */}
-        <View style={styles.row}>
-          <View style={styles.meta}>
-            <Users size={16} />
-            <Text style={styles.metaText}> {people}</Text>
           </View>
 
-          <View style={styles.meta}>
-            <Clock size={16} />
-            <Text style={styles.metaText}> {time}</Text>
+          {/* fila intermedia: estrellas */}
+          <View style={styles.stars}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity
+                key={star}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onRate(star);
+                  playSound("star");
+                }}
+              >
+                <AntDesign
+                  name={star <= rating ? "star" : "staro"}
+                  size={20}
+                  color={star <= rating ? "#f5c518" : "gray"}
+                  style={styles.star}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* fila inferior: personas + tiempo */}
+          <View style={styles.row}>
+            <View style={styles.meta}>
+              <Users size={16} />
+              <Text style={styles.metaText}> {people}</Text>
+            </View>
+
+            <View style={styles.meta}>
+              <Clock size={16} />
+              <Text style={styles.metaText}> {time}</Text>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

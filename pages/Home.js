@@ -71,7 +71,7 @@ export default function HomeScreen({ navigation }) {
             {...item}
             onRate={(newRating) => handleRate(item.id, newRating)}
             onToggleFavorite={() => handleToggleFavorite(item.id)}
-            onPress={() => navigation.navigate("Detail", { id: item.id })}
+            onPress={() => navigation.navigate("Detail", { id: item.id })} // ✅ pasamos el id
           />
         )}
         contentContainerStyle={styles.list}
