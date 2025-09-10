@@ -33,7 +33,7 @@ export async function getPlatos() {
 
 // Obtener plato por ID
 export async function getPlatoById(id) {
-  return await apiRequest(`/lookup.php?i=${id}`);
+  return await apiRequest(`https://www.themealdb.com/lookup.php?i=${id}`);
 }
 
 // Obtener plato por nombre

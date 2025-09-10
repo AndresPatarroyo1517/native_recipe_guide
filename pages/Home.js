@@ -11,7 +11,7 @@ import RecipeCard from "../components/RecipeCard";
 import { useRecipes } from "../service/RecipesContext";
 import { getPlatosAleatoriosObligatorio } from "../service/api";
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   const {
     recipes,
     handleRate,
@@ -68,12 +68,11 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <RecipeCard
-            {...recipe}
-            onRate={(newRating) => handleRate(recipe.id, newRating)}
-            onToggleFavorite={() => handleToggleFavorite(recipe.id)}
-            onPress={() => navigation.navigate("Detail", { id: recipe.id })} // 👈
+            {...item}
+            onRate={(newRating) => handleRate(item.id, newRating)}
+            onToggleFavorite={() => handleToggleFavorite(item.id)}
+            onPress={() => navigation.navigate("Detail", { id: item.id })}
           />
-
         )}
         contentContainerStyle={styles.list}
         refreshControl={

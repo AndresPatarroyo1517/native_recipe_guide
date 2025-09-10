@@ -3,8 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { RecipesProvider } from "./service/RecipesContext";
-
-import HomeStack from "./HomeStack"; 
+import HomeStack from "./pages/HomeStack";
 import FavoritesScreen from "./pages/Favorites";
 import SearchScreen from "./pages/Search";
 

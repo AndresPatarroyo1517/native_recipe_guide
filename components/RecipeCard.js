@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Users, Clock } from "lucide-react-native";
 import { AntDesign } from "@expo/vector-icons";
+import { playSound } from "../service/soundService";
 
 export default function RecipeCard({
   title,
@@ -21,7 +22,12 @@ export default function RecipeCard({
         {/* fila superior: título + corazón */}
         <View style={styles.header}>
           <Text style={styles.title}>{title}</Text>
-          <TouchableOpacity onPress={onToggleFavorite}>
+          <TouchableOpacity
+            onPress={() => {
+              onToggleFavorite();
+              playSound("like"); 
+            }}
+          >
             <AntDesign
               name={favorite ? "heart" : "hearto"}
               size={22}
@@ -33,7 +39,13 @@ export default function RecipeCard({
         {/* fila intermedia: estrellas */}
         <View style={styles.stars}>
           {[1, 2, 3, 4, 5].map((star) => (
-            <TouchableOpacity key={star} onPress={() => onRate(star)}>
+            <TouchableOpacity
+              key={star}
+              onPress={() => {
+                onRate(star);
+                playSound("star");
+              }}
+            >
               <AntDesign
                 name={star <= rating ? "star" : "staro"}
                 size={20}
