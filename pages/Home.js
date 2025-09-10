@@ -12,14 +12,27 @@ import { useRecipes } from "../service/RecipesContext";
 import { getPlatosAleatoriosObligatorio } from "../service/api";
 
 export default function HomeScreen() {
-  const { recipes, handleRate, handleToggleFavorite, addRecipes, loading } =
-    useRecipes();
+  const {
+    recipes,
+    handleRate,
+    handleToggleFavorite,
+    addRecipes,
+    loading,
+    favoriteIds,
+  } = useRecipes();
 
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
     try {
       setRefreshing(true);
+
+      // 🔥 1. Mantener los favoritos actuales
+      const favorites = recipes.filter((r) =>
+        favoriteIds.includes(r.id.toString())
+      );
+
+      // 2. Pedir 10 nuevos platos
       const platos = await getPlatosAleatoriosObligatorio(10);
       const mapped = platos.map((meal) => ({
         id: meal.idMeal,
@@ -30,9 +43,11 @@ export default function HomeScreen() {
         time: `${Math.floor(Math.random() * 60) + 10} min`,
         favorite: false,
       }));
-      addRecipes(mapped);
+
+      // 3. Reemplazar recetas en el contexto (favoritos + nuevas)
+      addRecipes([...favorites, ...mapped]);
     } catch (error) {
-      console.error("Error cargando más recetas:", error);
+      console.error("Error recargando recetas:", error);
     } finally {
       setRefreshing(false);
     }
