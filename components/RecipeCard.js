@@ -1,17 +1,51 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Users, Clock } from "lucide-react-native";
+import { AntDesign } from "@expo/vector-icons";
 
-export default function RecipeCard({ title, image, rating, people, time }) {
+export default function RecipeCard({
+  title,
+  image,
+  rating,
+  people,
+  time,
+  favorite,
+  onRate,
+  onToggleFavorite,
+}) {
   return (
-    <TouchableOpacity style={styles.card}>
+    <View style={styles.card}>
       <Image source={{ uri: image }} style={styles.image} />
+
       <View style={styles.info}>
-        <Text style={styles.title}>{title}</Text>
+        {/* fila superior: título + corazón */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{title}</Text>
+          <TouchableOpacity onPress={onToggleFavorite}>
+            <AntDesign
+              name={favorite ? "heart" : "hearto"}
+              size={22}
+              color={favorite ? "red" : "gray"}
+            />
+          </TouchableOpacity>
+        </View>
 
+        {/* fila intermedia: estrellas */}
+        <View style={styles.stars}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <TouchableOpacity key={star} onPress={() => onRate(star)}>
+              <AntDesign
+                name={star <= rating ? "star" : "staro"}
+                size={20}
+                color={star <= rating ? "#f5c518" : "gray"}
+                style={styles.star}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* fila inferior: personas + tiempo */}
         <View style={styles.row}>
-          <Text style={styles.rating}>{"⭐".repeat(rating)}</Text>
-
           <View style={styles.meta}>
             <Users size={16} />
             <Text style={styles.metaText}> {people}</Text>
@@ -23,7 +57,7 @@ export default function RecipeCard({ title, image, rating, people, time }) {
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -40,9 +74,19 @@ const styles = StyleSheet.create({
   },
   image: { width: "100%", height: 160 },
   info: { padding: 12 },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   title: { fontSize: 18, fontWeight: "bold" },
-  row: { flexDirection: "row", alignItems: "center", marginTop: 6 },
-  rating: { marginRight: 8 },
+  stars: { flexDirection: "row", marginTop: 6 },
+  star: { marginRight: 4 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
   meta: { flexDirection: "row", alignItems: "center", marginRight: 14 },
   metaText: { fontSize: 14 },
 });

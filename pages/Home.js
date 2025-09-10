@@ -1,37 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import RecipeCard from "../components/RecipeCard";
-import { getCategories, getPlatosByFirstLetter, getPlatoById, getPlatoByName, getPlatosByCategory, getPlatoAleatorio, getPlatosAleatorios, getPlatosAleatoriosObligatorio, getListByType, getPlatosByIngredient, getPlatosByArea } from "../service/api";
+import { useRecipes } from "../service/RecipesContext";
 
 export default function HomeScreen() {
-
-  // Ejemplo para prueba de API (se puede borrar el useEffect)
-  useEffect(() => {
-    const fetchPlatos = async () => {
-      const data = await getPlatosByArea("canadian");
-      console.log(data)
-    };
-    fetchPlatos();
-  }, []);
+  const { recipes, handleRate, handleToggleFavorite } = useRecipes();
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <RecipeCard
-          title="Antipasti"
-          image="https://i.imgur.com/VRm0iKd.jpg"
-          rating={4}
-          people={4}
-          time="30 min"
-        />
-        <RecipeCard
-          title="Pizza"
-          image="https://i.imgur.com/OpGxN0D.jpg"
-          rating={5}
-          people={3}
-          time="40 min"
-        />
+        {recipes.map((recipe) => (
+          <RecipeCard
+            key={recipe.id}
+            {...recipe}
+            onRate={(newRating) => handleRate(recipe.id, newRating)}
+            onToggleFavorite={() => handleToggleFavorite(recipe.id)}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );

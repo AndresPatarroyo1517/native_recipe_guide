@@ -105,7 +105,7 @@ export async function getPlatosAleatorios(count = 10) {
 }
 
 // Obtener varios platos aleatorios (si o si hasta completar la cantidad de platos solicitada)
-export async function getPlatosAleatoriosObligatorio(count = 10) {
+export async function getPlatosAleatoriosObligatorio(count = 5) {
   const ids = new Set();
   const platos = [];
 
