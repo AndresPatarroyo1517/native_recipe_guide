@@ -6,10 +6,10 @@ const RecipesContext = createContext();
 
 export const RecipesProvider = ({ children }) => {
   const [recipes, setRecipes] = useState([]);
-  const [favoriteIds, setFavoriteIds] = useState([]); // 👉 IDs con corazón
+  const [favoriteIds, setFavoriteIds] = useState([]); 
   const [loading, setLoading] = useState(true);
 
-  // 👉 Cargar recetas y favoritos desde storage
+  
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -30,7 +30,7 @@ export const RecipesProvider = ({ children }) => {
     loadData();
   }, []);
 
-  // 👉 Guardar cambios en recipes
+ 
   useEffect(() => {
     if (recipes.length > 0) {
       AsyncStorage.setItem("recipes", JSON.stringify(recipes)).catch((err) =>
@@ -39,14 +39,14 @@ export const RecipesProvider = ({ children }) => {
     }
   }, [recipes]);
 
-  // 👉 Guardar cambios en favoritos
+ 
   useEffect(() => {
     AsyncStorage.setItem("favoriteIds", JSON.stringify(favoriteIds)).catch(
       (err) => console.error("Error guardando favoritos:", err)
     );
   }, [favoriteIds]);
 
-  // 🔹 Cargar recetas iniciales
+  
   const fetchInitialRecipes = async () => {
     try {
       const platos = await getPlatosAleatoriosObligatorio(10);
@@ -65,7 +65,7 @@ export const RecipesProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Agregar recetas nuevas desde API o búsquedas
+  
   const addRecipes = (newRecipes) => {
     setRecipes((prev) => {
       const existingIds = prev.map((r) => r.id.toString());
@@ -76,7 +76,7 @@ export const RecipesProvider = ({ children }) => {
     });
   };
 
-  // 🔹 Calificar receta
+  
   const handleRate = (id, newRating) => {
     setRecipes((prev) =>
       prev.map((r) =>
@@ -85,7 +85,7 @@ export const RecipesProvider = ({ children }) => {
     );
   };
 
-  // 🔹 Favorito / quitar favorito
+ 
   const handleToggleFavorite = (id) => {
     setRecipes((prev) =>
       prev.map((r) =>
