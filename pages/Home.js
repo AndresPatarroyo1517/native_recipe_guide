@@ -68,10 +68,12 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <RecipeCard
-            {...item}
-            onRate={(newRating) => handleRate(item.id, newRating)}
-            onToggleFavorite={() => handleToggleFavorite(item.id)}
+            {...recipe}
+            onRate={(newRating) => handleRate(recipe.id, newRating)}
+            onToggleFavorite={() => handleToggleFavorite(recipe.id)}
+            onPress={() => navigation.navigate("Detail", { id: recipe.id })} // 👈
           />
+
         )}
         contentContainerStyle={styles.list}
         refreshControl={
