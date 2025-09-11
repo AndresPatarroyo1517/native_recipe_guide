@@ -13,7 +13,7 @@ export default function RecipeCard({
   favorite,
   onRate,
   onToggleFavorite,
-  onPress, // ✅ recibimos la prop
+  onPress,
 }) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
@@ -21,12 +21,12 @@ export default function RecipeCard({
         <Image source={{ uri: image }} style={styles.image} />
 
         <View style={styles.info}>
-          {/* fila superior: título + corazón */}
           <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.title} numberOfLines={2}>{title}</Text>
             <TouchableOpacity
+              style={styles.favoriteButton}
               onPress={(e) => {
-                e.stopPropagation(); // evita que toque la card
+                e.stopPropagation();
                 onToggleFavorite();
                 playSound("like");
               }}
@@ -39,7 +39,6 @@ export default function RecipeCard({
             </TouchableOpacity>
           </View>
 
-          {/* fila intermedia: estrellas */}
           <View style={styles.stars}>
             {[1, 2, 3, 4, 5].map((star) => (
               <TouchableOpacity
@@ -60,7 +59,6 @@ export default function RecipeCard({
             ))}
           </View>
 
-          {/* fila inferior: personas + tiempo */}
           <View style={styles.row}>
             <View style={styles.meta}>
               <Users size={16} />
@@ -90,14 +88,25 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   image: { width: "100%", height: 160 },
-  info: { padding: 12 },
+  info: { padding: 16 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    minHeight: 50,
   },
-  title: { fontSize: 18, fontWeight: "bold" },
-  stars: { flexDirection: "row", marginTop: 6 },
+  title: { 
+    fontSize: 18, 
+    fontWeight: "bold",
+    flex: 1,
+    marginRight: 12,
+  },
+  favoriteButton: {
+    padding: 8,
+    marginTop: -4,
+    marginRight: -4,
+  },
+  stars: { flexDirection: "row", marginTop: 8 },
   star: { marginRight: 4 },
   row: {
     flexDirection: "row",
