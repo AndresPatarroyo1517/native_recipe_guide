@@ -1,16 +1,18 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Heart } from "lucide-react-native"; // ❤️ icono más pro
+import { Heart } from "lucide-react-native";
 import { useRecipes } from "../service/RecipesContext";
 import RecipeCard from "../components/RecipeCard";
+import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width / 2 - 24; // grid de 2 columnas
+const CARD_WIDTH = width / 2 - 24;
 
 export default function FavoritesScreen() {
   const { recipes, handleRate, handleToggleFavorite } = useRecipes();
   const favorites = recipes.filter((r) => r.favorite);
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -44,6 +46,12 @@ export default function FavoritesScreen() {
                 {...item}
                 onRate={(newRating) => handleRate(item.id, newRating)}
                 onToggleFavorite={() => handleToggleFavorite(item.id)}
+                onPress={() =>
+                  navigation.navigate("Home", {
+                    screen: "Detail",
+                    params: { id: item.id },
+                  })
+                }
               />
             </View>
           )}
