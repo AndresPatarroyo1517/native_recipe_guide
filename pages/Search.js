@@ -17,7 +17,7 @@ import { useRecipes } from "../service/RecipesContext";
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width / 2 - 24;
 
-export default function SearchScreen() {
+export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState("");
   const [ids, setIds] = useState([]);
   const { recipes, addRecipes, handleRate, handleToggleFavorite } = useRecipes();
@@ -87,11 +87,19 @@ export default function SearchScreen() {
                 {...item}
                 onRate={(newRating) => handleRate(item.id, newRating)}
                 onToggleFavorite={() => handleToggleFavorite(item.id)}
+                onPress={() =>
+                  navigation.navigate("Home", {
+                    screen: "Detail",
+                    params: { id: item.id },
+                  })
+                }
               />
             </View>
           )}
           showsVerticalScrollIndicator={false}
         />
+
+
       )}
     </SafeAreaView>
   );
