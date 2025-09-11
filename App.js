@@ -1,4 +1,3 @@
-import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,6 +5,7 @@ import { RecipesProvider } from "./service/RecipesContext";
 import HomeStack from "./pages/HomeStack";
 import FavoritesScreen from "./pages/Favorites";
 import SearchScreen from "./pages/Search";
+import Categories from "./pages/Categories";
 
 const Tab = createBottomTabNavigator();
 
@@ -25,6 +25,9 @@ export default function App() {
               } else if (route.name === "Favorites") {
                 iconName = focused ? "heart" : "heart-outline";
               }
+              else if (route.name === "Categories") {
+                iconName = focused ? "grid" : "grid-outline";
+              }
               return <Ionicons name={iconName} size={size} color={color} />;
             },
             tabBarActiveTintColor: "#e91e63",
@@ -32,6 +35,7 @@ export default function App() {
           })}
         >
           <Tab.Screen name="Home" component={HomeStack} />
+          <Tab.Screen name="Categories" component={Categories} />
           <Tab.Screen name="Search" component={SearchScreen} />
           <Tab.Screen name="Favorites" component={FavoritesScreen} />
         </Tab.Navigator>
