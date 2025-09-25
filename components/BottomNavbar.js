@@ -3,11 +3,12 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Home as HomeIcon, Heart, Search as SearchIcon, ListCheck } from "lucide-react-native";
+import { Home as HomeIcon, Heart, Search as SearchIcon, ListCheck, SquarePlus } from "lucide-react-native";
 import HomeScreen from "../pages/Home";
 import FavoritesScreen from "../pages/Favorites";
 import SearchScreen from "../pages/Search";
 import Categories from '../pages/Categories';
+import CreateScreen from "../pages/Create";
 
 const Tab = createBottomTabNavigator();
 
@@ -53,6 +54,7 @@ export default function BottomNavBar() {
         <Tab.Screen name="Categories" component={Categories} />
         <Tab.Screen name="Search" component={SearchScreen} />
         <Tab.Screen name="Favorites" component={FavoritesScreen} />
+        <Tab.Screen name="Create" component={CreateScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );

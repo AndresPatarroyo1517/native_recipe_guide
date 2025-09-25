@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./Home";
 import DetailScreen from "./Detail";
 import CategoryRecipes from './CategoriesRecipe';
+import CreateScreen from "./Create";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +25,11 @@ export default function HomeStack() {
         name="CategoryRecipes"
         component={CategoryRecipes}
         options={{ title: 'Recetas por Categoría' }}
+      />
+      <Stack.Screen
+        name="Create"
+        component={CreateScreen}
+        options={{ title: 'Agregar una nueva receta' }}
       />
     </Stack.Navigator>
   );

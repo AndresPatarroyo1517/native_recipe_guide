@@ -5,11 +5,14 @@ import {
   FlatList,
   RefreshControl,
   View,
+  Text,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import RecipeCard from "../components/RecipeCard";
 import { useRecipes } from "../service/RecipesContext";
 import { getPlatosAleatoriosObligatorio } from "../service/api";
+import { SquarePlus } from "lucide-react-native";
 
 export default function HomeScreen({ navigation }) {
   const {
@@ -27,12 +30,10 @@ export default function HomeScreen({ navigation }) {
     try {
       setRefreshing(true);
 
-      // 🔥 1. Mantener los favoritos actuales
       const favorites = recipes.filter((r) =>
         favoriteIds.includes(r.id.toString())
       );
 
-      // 2. Pedir 10 nuevos platos
       const platos = await getPlatosAleatoriosObligatorio(10);
       const mapped = platos.map((meal) => ({
         id: meal.idMeal,
@@ -44,7 +45,6 @@ export default function HomeScreen({ navigation }) {
         favorite: false,
       }));
 
-      // 3. Reemplazar recetas en el contexto (favoritos + nuevas)
       addRecipes([...favorites, ...mapped]);
     } catch (error) {
       console.error("Error recargando recetas:", error);
@@ -63,6 +63,14 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* 🔥 HEADER CON TITULO Y BOTON */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Recetas</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Create")}>
+          <SquarePlus size={28} color="#ff6347" />
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={recipes}
         keyExtractor={(item) => item.id.toString()}
@@ -71,7 +79,7 @@ export default function HomeScreen({ navigation }) {
             {...item}
             onRate={(newRating) => handleRate(item.id, newRating)}
             onToggleFavorite={() => handleToggleFavorite(item.id)}
-            onPress={() => navigation.navigate("Detail", { id: item.id })} // ✅ pasamos el id
+            onPress={() => navigation.navigate("Detail", { id: item.id })}
           />
         )}
         contentContainerStyle={styles.list}
@@ -95,6 +103,21 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: "#f4f4f4",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#333",
   },
   list: {
     padding: 12,

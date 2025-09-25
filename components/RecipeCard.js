@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Users, Clock } from "lucide-react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { playSound } from "../service/soundService";
 
 export default function RecipeCard({
@@ -31,8 +31,8 @@ export default function RecipeCard({
                 playSound("like");
               }}
             >
-              <AntDesign
-                name={favorite ? "heart" : "hearto"}
+              <Ionicons
+                name={favorite ? "heart" : "heart-outline"}
                 size={22}
                 color={favorite ? "red" : "gray"}
               />
@@ -49,8 +49,8 @@ export default function RecipeCard({
                   playSound("star");
                 }}
               >
-                <AntDesign
-                  name={star <= rating ? "star" : "staro"}
+                <Ionicons
+                  name={star <= rating ? "star" : "star-outline"}
                   size={20}
                   color={star <= rating ? "#f5c518" : "gray"}
                   style={styles.star}
