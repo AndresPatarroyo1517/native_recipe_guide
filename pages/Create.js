@@ -9,9 +9,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Plus, Trash2 } from "lucide-react-native";
+import { db } from "../config/firebaseConfig";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 export default function CreateScreen({ navigation }) {
   const [title, setTitle] = useState("");
@@ -22,6 +25,7 @@ export default function CreateScreen({ navigation }) {
   const [link, setLink] = useState("");
   const [detalle, setDetalle] = useState("");
   const [ingredients, setIngredients] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleAddIngredient = () => {
     setIngredients([...ingredients, ""]);
@@ -37,7 +41,12 @@ export default function CreateScreen({ navigation }) {
     setIngredients(newIngredients);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!title.trim()) {
+      Alert.alert("Error", "El nombre de la receta es obligatorio");
+      return;
+    }
+
     const newRecipe = {
       title,
       image,
@@ -47,10 +56,33 @@ export default function CreateScreen({ navigation }) {
       link,
       detalle,
       ingredients: ingredients.filter((i) => i.trim() !== ""),
+      createdAt: serverTimestamp(),
     };
 
-    console.log("Nueva receta:", newRecipe);
-    navigation.goBack();
+    try {
+      setLoading(true);
+      await addDoc(collection(db, "recetas"), newRecipe);
+      console.log("Receta guardada:", newRecipe);
+
+      Alert.alert("Éxito", "La receta se ha guardado correctamente");
+
+      // Limpieza del formulario
+      setTitle("");
+      setImage("");
+      setRating("");
+      setPeople("");
+      setTime("");
+      setLink("");
+      setDetalle("");
+      setIngredients([]);
+
+      navigation.goBack(); // volver a la pantalla anterior
+    } catch (error) {
+      console.error("Error guardando la receta:", error);
+      Alert.alert("Error", "No se pudo guardar la receta. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -161,8 +193,14 @@ export default function CreateScreen({ navigation }) {
           />
 
           {/* Botón guardar */}
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Guardar Receta</Text>
+          <TouchableOpacity
+            style={[styles.button, loading && { opacity: 0.6 }]}
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? "Guardando..." : "Guardar Receta"}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -178,7 +216,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     padding: 16,
-    paddingBottom: 40, // espacio extra para el último botón
+    paddingBottom: 40,
   },
   header: {
     fontSize: 26,
