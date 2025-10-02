@@ -10,17 +10,34 @@ import {
   Linking 
 } from "react-native";
 import { getPlatoById } from "../service/api";
+import { useRecipes } from "../service/RecipesContext";
 
 export default function DetailScreen({ route }) {
   const { id } = route.params;
+  const { getRecipeById } = useRecipes();
   const [meal, setMeal] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isCustom, setIsCustom] = useState(false);
 
   useEffect(() => {
     const fetchMeal = async () => {
       try {
-        const data = await getPlatoById(id);
-        setMeal(data.meals[0]);
+        const idStr = id.toString();
+        
+        // Detectar si es receta personalizada
+        if (idStr.startsWith("custom_")) {
+          setIsCustom(true);
+          // Obtener desde el contexto
+          const customRecipe = getRecipeById(idStr);
+          if (customRecipe) {
+            setMeal(customRecipe);
+          }
+        } else {
+          // Es de la API externa
+          setIsCustom(false);
+          const data = await getPlatoById(id);
+          setMeal(data.meals[0]);
+        }
       } catch (err) {
         console.error("Error cargando plato:", err);
       } finally {
@@ -38,9 +55,76 @@ export default function DetailScreen({ route }) {
     );
   }
 
-  if (!meal) return <Text>No se encontró el plato.</Text>;
+  if (!meal) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>No se encontró la receta.</Text>
+      </View>
+    );
+  }
 
-  // extraer ingredientes
+  // Renderizar receta personalizada
+  if (isCustom) {
+    return (
+      <ScrollView 
+        style={styles.container} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Imagen */}
+        <View style={styles.imageWrapper}>
+          <Image 
+            source={{ uri: meal.image || "https://via.placeholder.com/300" }} 
+            style={styles.image} 
+          />
+        </View>
+
+        {/* Título y metadatos */}
+        <Text style={styles.title}>{meal.title}</Text>
+        <View style={styles.metaContainer}>
+          <Text style={styles.metaText}>⭐ {meal.rating}/5</Text>
+          <Text style={styles.metaText}>👥 {meal.people} personas</Text>
+          <Text style={styles.metaText}>⏱️ {meal.time}</Text>
+        </View>
+
+        {/* Ingredientes */}
+        {meal.ingredients && meal.ingredients.length > 0 && (
+          <>
+            <Text style={styles.section}>Ingredientes</Text>
+            <View style={styles.card}>
+              {meal.ingredients.map((ing, i) => (
+                <Text key={i} style={styles.ingredient}>• {ing}</Text>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* Instrucciones */}
+        {meal.detalle && (
+          <>
+            <Text style={styles.section}>Instrucciones</Text>
+            <View style={styles.card}>
+              <Text style={styles.instructions}>{meal.detalle}</Text>
+            </View>
+          </>
+        )}
+
+        {/* Link a video */}
+        {meal.link && (
+          <TouchableOpacity 
+            style={styles.youtubeButton} 
+            activeOpacity={0.85}
+            onPress={() => Linking.openURL(meal.link)}
+          >
+            <Text style={styles.youtubeText}>📺 Ver Video de Referencia</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+    );
+  }
+
+  // Renderizar receta de API externa
+  // Extraer ingredientes del formato API
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ing = meal[`strIngredient${i}`];
@@ -80,7 +164,7 @@ export default function DetailScreen({ route }) {
       </View>
 
       {/* Link a YouTube */}
-      {meal.strYoutube ? (
+      {meal.strYoutube && (
         <TouchableOpacity 
           style={styles.youtubeButton} 
           activeOpacity={0.85}
@@ -88,7 +172,7 @@ export default function DetailScreen({ route }) {
         >
           <Text style={styles.youtubeText}>📺 Ver Video en YouTube</Text>
         </TouchableOpacity>
-      ) : null}
+      )}
     </ScrollView>
   );
 }
@@ -98,6 +182,7 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 20, paddingBottom: 50 },
 
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  errorText: { fontSize: 16, color: "#999" },
 
   imageWrapper: {
     borderRadius: 20,
@@ -127,6 +212,18 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     letterSpacing: 1,
     textTransform: "uppercase",
+  },
+  metaContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+    gap: 16,
+  },
+  metaText: {
+    fontSize: 14,
+    color: "#6C757D",
+    fontWeight: "500",
   },
 
   section: { 
@@ -177,4 +274,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: 0.5,
   },
-});
+}); 

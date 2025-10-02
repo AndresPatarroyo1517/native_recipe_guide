@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, onSnapshot } from "firebase/firestore";
 import { getPlatosAleatoriosObligatorio } from "../service/api";
 import { db } from "../config/firebaseConfig";
 
@@ -7,10 +7,11 @@ const RecipesContext = createContext();
 
 export const RecipesProvider = ({ children }) => {
   const [recipes, setRecipes] = useState([]);
+  const [customRecipes, setCustomRecipes] = useState([]); // Recetas de Firestore
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Carga inicial: recetas desde API, favoritos desde Firebase
+  // Carga inicial: recetas desde API, recetas personalizadas y favoritos desde Firebase
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -32,6 +33,39 @@ export const RecipesProvider = ({ children }) => {
     loadData();
   }, []);
 
+  // Escuchar cambios en tiempo real de las recetas personalizadas
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "recetas"),
+      (snapshot) => {
+        const customRecipesData = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: `custom_${doc.id}`, // Prefijo para diferenciar de API
+            firestoreId: doc.id, // ID original de Firestore
+            title: data.title,
+            image: data.image || "https://via.placeholder.com/300",
+            rating: data.rating || 0,
+            people: data.people || 0,
+            time: data.time || "N/A",
+            link: data.link,
+            detalle: data.detalle,
+            ingredients: data.ingredients || [],
+            favorite: false,
+            isCustom: true, // Flag para identificar recetas personalizadas
+            createdAt: data.createdAt,
+          };
+        });
+        setCustomRecipes(customRecipesData);
+      },
+      (error) => {
+        console.error("Error escuchando recetas personalizadas:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
   // Guardar favoritos en Firestore cuando cambian
   useEffect(() => {
     const saveFavorites = async () => {
@@ -43,7 +77,6 @@ export const RecipesProvider = ({ children }) => {
       }
     };
 
-    // Guardar solo si ya cargó la lista inicial (para evitar guardar antes de cargar)
     if (!loading) {
       saveFavorites();
     }
@@ -61,6 +94,7 @@ export const RecipesProvider = ({ children }) => {
         people: Math.floor(Math.random() * 5) + 1,
         time: `${Math.floor(Math.random() * 60) + 10} min`,
         favorite: false,
+        isCustom: false,
       }));
       setRecipes(mapped);
     } catch (err) {
@@ -68,7 +102,13 @@ export const RecipesProvider = ({ children }) => {
     }
   };
 
-  // Añadir recetas sin duplicados en estado local (no guardamos en Firebase)
+  // Combinar recetas de API y personalizadas
+  const allRecipes = [...customRecipes, ...recipes].map((recipe) => ({
+    ...recipe,
+    favorite: favoriteIds.includes(recipe.id.toString()),
+  }));
+
+  // Añadir recetas sin duplicados en estado local
   const addRecipes = (newRecipes) => {
     setRecipes((prev) => {
       const existingIds = prev.map((r) => r.id.toString());
@@ -81,38 +121,51 @@ export const RecipesProvider = ({ children }) => {
 
   // Cambiar rating en estado local
   const handleRate = (id, newRating) => {
-    setRecipes((prev) =>
-      prev.map((r) =>
-        r.id.toString() === id.toString() ? { ...r, rating: newRating } : r
-      )
+    const idStr = id.toString();
+    
+    // Si es receta personalizada, actualizar customRecipes
+    if (idStr.startsWith("custom_")) {
+      setCustomRecipes((prev) =>
+        prev.map((r) =>
+          r.id.toString() === idStr ? { ...r, rating: newRating } : r
+        )
+      );
+    } else {
+      // Si es de API, actualizar recipes
+      setRecipes((prev) =>
+        prev.map((r) =>
+          r.id.toString() === idStr ? { ...r, rating: newRating } : r
+        )
+      );
+    }
+  };
+
+  // Toggle favorito
+  const handleToggleFavorite = (id) => {
+    const idStr = id.toString();
+
+    setFavoriteIds((prev) =>
+      prev.includes(idStr)
+        ? prev.filter((fid) => fid !== idStr)
+        : [...prev, idStr]
     );
   };
 
-  // Toggle favorito en estado local y actualizar favoritos en Firebase
-  const handleToggleFavorite = (id) => {
-    setRecipes((prev) =>
-      prev.map((r) =>
-        r.id.toString() === id.toString()
-          ? { ...r, favorite: !r.favorite }
-          : r
-      )
-    );
-
-    setFavoriteIds((prev) =>
-      prev.includes(id.toString())
-        ? prev.filter((fid) => fid !== id.toString())
-        : [...prev, id.toString()]
-    );
+  // NUEVA FUNCIÓN: Obtener receta por ID
+  const getRecipeById = (id) => {
+    const idStr = id.toString();
+    return allRecipes.find((recipe) => recipe.id.toString() === idStr);
   };
 
   return (
     <RecipesContext.Provider
       value={{
-        recipes,
+        recipes: allRecipes, // Devolvemos todas las recetas combinadas
         favoriteIds,
         addRecipes,
         handleRate,
         handleToggleFavorite,
+        getRecipeById, // Nueva función exportada
         loading,
       }}
     >
