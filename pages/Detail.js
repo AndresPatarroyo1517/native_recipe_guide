@@ -24,16 +24,16 @@ export default function DetailScreen({ route }) {
       try {
         const idStr = id.toString();
         
-        // Detectar si es receta personalizada
+       
         if (idStr.startsWith("custom_")) {
           setIsCustom(true);
-          // Obtener desde el contexto
+         
           const customRecipe = getRecipeById(idStr);
           if (customRecipe) {
             setMeal(customRecipe);
           }
         } else {
-          // Es de la API externa
+          
           setIsCustom(false);
           const data = await getPlatoById(id);
           setMeal(data.meals[0]);
@@ -63,7 +63,7 @@ export default function DetailScreen({ route }) {
     );
   }
 
-  // Renderizar receta personalizada
+  
   if (isCustom) {
     return (
       <ScrollView 
@@ -123,8 +123,7 @@ export default function DetailScreen({ route }) {
     );
   }
 
-  // Renderizar receta de API externa
-  // Extraer ingredientes del formato API
+  
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ing = meal[`strIngredient${i}`];

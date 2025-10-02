@@ -7,18 +7,18 @@ const RecipesContext = createContext();
 
 export const RecipesProvider = ({ children }) => {
   const [recipes, setRecipes] = useState([]);
-  const [customRecipes, setCustomRecipes] = useState([]); // Recetas de Firestore
+  const [customRecipes, setCustomRecipes] = useState([]); 
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Carga inicial: recetas desde API, recetas personalizadas y favoritos desde Firebase
+  
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Cargar recetas iniciales desde API
+        
         await fetchInitialRecipes();
 
-        // Cargar favoritos desde Firestore
+        
         const favSnapshot = await getDoc(doc(db, "favs", "favIds"));
         if (favSnapshot.exists()) {
           setFavoriteIds(favSnapshot.data().ids || []);
@@ -33,7 +33,7 @@ export const RecipesProvider = ({ children }) => {
     loadData();
   }, []);
 
-  // Escuchar cambios en tiempo real de las recetas personalizadas
+  
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "recetas"),
@@ -41,8 +41,8 @@ export const RecipesProvider = ({ children }) => {
         const customRecipesData = snapshot.docs.map((doc) => {
           const data = doc.data();
           return {
-            id: `custom_${doc.id}`, // Prefijo para diferenciar de API
-            firestoreId: doc.id, // ID original de Firestore
+            id: `custom_${doc.id}`, 
+            firestoreId: doc.id, 
             title: data.title,
             image: data.image || "https://via.placeholder.com/300",
             rating: data.rating || 0,
@@ -52,7 +52,7 @@ export const RecipesProvider = ({ children }) => {
             detalle: data.detalle,
             ingredients: data.ingredients || [],
             favorite: false,
-            isCustom: true, // Flag para identificar recetas personalizadas
+            isCustom: true, 
             createdAt: data.createdAt,
           };
         });
@@ -66,7 +66,7 @@ export const RecipesProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Guardar favoritos en Firestore cuando cambian
+ 
   useEffect(() => {
     const saveFavorites = async () => {
       try {
@@ -82,7 +82,7 @@ export const RecipesProvider = ({ children }) => {
     }
   }, [favoriteIds, loading]);
 
-  // Obtener recetas iniciales desde API externa
+ 
   const fetchInitialRecipes = async () => {
     try {
       const platos = await getPlatosAleatoriosObligatorio(10);
@@ -102,13 +102,13 @@ export const RecipesProvider = ({ children }) => {
     }
   };
 
-  // Combinar recetas de API y personalizadas
+ 
   const allRecipes = [...customRecipes, ...recipes].map((recipe) => ({
     ...recipe,
     favorite: favoriteIds.includes(recipe.id.toString()),
   }));
 
-  // Añadir recetas sin duplicados en estado local
+ 
   const addRecipes = (newRecipes) => {
     setRecipes((prev) => {
       const existingIds = prev.map((r) => r.id.toString());
@@ -119,11 +119,11 @@ export const RecipesProvider = ({ children }) => {
     });
   };
 
-  // Cambiar rating en estado local
+ 
   const handleRate = (id, newRating) => {
     const idStr = id.toString();
     
-    // Si es receta personalizada, actualizar customRecipes
+    
     if (idStr.startsWith("custom_")) {
       setCustomRecipes((prev) =>
         prev.map((r) =>
@@ -131,7 +131,7 @@ export const RecipesProvider = ({ children }) => {
         )
       );
     } else {
-      // Si es de API, actualizar recipes
+     
       setRecipes((prev) =>
         prev.map((r) =>
           r.id.toString() === idStr ? { ...r, rating: newRating } : r
@@ -140,7 +140,7 @@ export const RecipesProvider = ({ children }) => {
     }
   };
 
-  // Toggle favorito
+ 
   const handleToggleFavorite = (id) => {
     const idStr = id.toString();
 
@@ -151,13 +151,13 @@ export const RecipesProvider = ({ children }) => {
     );
   };
 
-  // Obtener receta por ID
+  
   const getRecipeById = (id) => {
     const idStr = id.toString();
     return allRecipes.find((recipe) => recipe.id.toString() === idStr);
   };
 
-  // NUEVA FUNCIÓN: Buscar recetas en ambas fuentes
+  
   const searchRecipes = (query) => {
     if (!query || query.trim().length === 0) {
       return [];
@@ -165,7 +165,7 @@ export const RecipesProvider = ({ children }) => {
 
     const searchTerm = query.toLowerCase().trim();
 
-    // Buscar en recetas personalizadas (Firestore)
+    
     const customResults = customRecipes.filter((recipe) => {
       const titleMatch = recipe.title.toLowerCase().includes(searchTerm);
       const ingredientsMatch = recipe.ingredients?.some((ing) =>
@@ -174,12 +174,12 @@ export const RecipesProvider = ({ children }) => {
       return titleMatch || ingredientsMatch;
     });
 
-    // Buscar en recetas de API (solo por título, ya que no tenemos ingredientes cargados)
+   
     const apiResults = recipes.filter((recipe) =>
       recipe.title.toLowerCase().includes(searchTerm)
     );
 
-    // Combinar resultados y agregar estado de favorito
+   
     return [...customResults, ...apiResults].map((recipe) => ({
       ...recipe,
       favorite: favoriteIds.includes(recipe.id.toString()),
@@ -189,13 +189,13 @@ export const RecipesProvider = ({ children }) => {
   return (
     <RecipesContext.Provider
       value={{
-        recipes: allRecipes, // Devolvemos todas las recetas combinadas
+        recipes: allRecipes, 
         favoriteIds,
         addRecipes,
         handleRate,
         handleToggleFavorite,
         getRecipeById,
-        searchRecipes, // Nueva función de búsqueda
+        searchRecipes, 
         loading,
       }}
     >

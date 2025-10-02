@@ -66,7 +66,7 @@ export default function CreateScreen({ navigation }) {
 
       Alert.alert("Éxito", "La receta se ha guardado correctamente");
 
-      // Limpieza del formulario
+      
       setTitle("");
       setImage("");
       setRating("");
@@ -76,7 +76,7 @@ export default function CreateScreen({ navigation }) {
       setDetalle("");
       setIngredients([]);
 
-      navigation.goBack(); // volver a la pantalla anterior
+      navigation.goBack(); 
     } catch (error) {
       console.error("Error guardando la receta:", error);
       Alert.alert("Error", "No se pudo guardar la receta. Intenta de nuevo.");
