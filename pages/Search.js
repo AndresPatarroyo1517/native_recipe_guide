@@ -19,35 +19,55 @@ const CARD_WIDTH = width / 2 - 24;
 
 export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState("");
-  const [ids, setIds] = useState([]);
-  const { recipes, addRecipes, handleRate, handleToggleFavorite } = useRecipes();
+  const [searchResults, setSearchResults] = useState([]);
+  const { addRecipes, handleRate, handleToggleFavorite, searchRecipes } = useRecipes();
 
   const handleSearch = async (text) => {
     setQuery(text);
+    
     if (text.length > 2) {
-      const data = await getPlatoByName(text);
-      if (data?.meals) {
-        const mapped = data.meals.map((meal) => ({
-          id: meal.idMeal,
-          title: meal.strMeal,
-          image: meal.strMealThumb,
-          rating: 0,
-          people: Math.floor(Math.random() * 5) + 1,
-          time: `${Math.floor(Math.random() * 60) + 10} min`,
-          favorite: false,
-        }));
+      // 1. Buscar en recetas locales (API ya cargadas + Firestore)
+      const localResults = searchRecipes(text);
+      
+      // 2. Buscar en la API externa
+      try {
+        const data = await getPlatoByName(text);
+        if (data?.meals) {
+          const mapped = data.meals.map((meal) => ({
+            id: meal.idMeal,
+            title: meal.strMeal,
+            image: meal.strMealThumb,
+            rating: 0,
+            people: Math.floor(Math.random() * 5) + 1,
+            time: `${Math.floor(Math.random() * 60) + 10} min`,
+            favorite: false,
+            isCustom: false,
+          }));
 
-        addRecipes(mapped);
-        setIds(mapped.map((m) => m.id));
-      } else {
-        setIds([]);
+          // Agregar al contexto sin duplicados
+          addRecipes(mapped);
+          
+          // Combinar resultados locales con los de la API
+          // Evitar duplicados comparando IDs
+          const localIds = localResults.map(r => r.id.toString());
+          const newApiResults = mapped.filter(
+            m => !localIds.includes(m.id.toString())
+          );
+          
+          setSearchResults([...localResults, ...newApiResults]);
+        } else {
+          // Solo resultados locales
+          setSearchResults(localResults);
+        }
+      } catch (error) {
+        console.error("Error buscando en API:", error);
+        // En caso de error, mostrar solo resultados locales
+        setSearchResults(localResults);
       }
     } else {
-      setIds([]);
+      setSearchResults([]);
     }
   };
-
-  const searchResults = recipes.filter((r) => ids.includes(r.id));
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -61,7 +81,10 @@ export default function SearchScreen({ navigation }) {
           placeholderTextColor="#aaa"
         />
         {query.length > 0 && (
-          <TouchableOpacity onPress={() => handleSearch("")}>
+          <TouchableOpacity onPress={() => {
+            setQuery("");
+            setSearchResults([]);
+          }}>
             <Text style={styles.clear}>✕</Text>
           </TouchableOpacity>
         )}
@@ -71,7 +94,15 @@ export default function SearchScreen({ navigation }) {
         <View style={styles.emptyBox}>
           <Text style={styles.noResults}>😔 No se encontraron resultados</Text>
           <Text style={styles.suggestion}>
-            Intenta con otro nombre o categoría
+            Intenta con otro nombre o ingrediente
+          </Text>
+        </View>
+      ) : query.length === 0 ? (
+        <View style={styles.emptyBox}>
+          <Text style={styles.hint}>🔍</Text>
+          <Text style={styles.hintText}>Escribe para buscar recetas</Text>
+          <Text style={styles.hintSubtext}>
+            Busca por nombre o ingredientes
           </Text>
         </View>
       ) : (
@@ -98,8 +129,6 @@ export default function SearchScreen({ navigation }) {
           )}
           showsVerticalScrollIndicator={false}
         />
-
-
       )}
     </SafeAreaView>
   );
@@ -135,6 +164,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
   },
-  noResults: { fontSize: 18, fontWeight: "600", marginBottom: 8, color: "#333" },
-  suggestion: { fontSize: 14, color: "#666", textAlign: "center" },
+  noResults: { 
+    fontSize: 18, 
+    fontWeight: "600", 
+    marginBottom: 8, 
+    color: "#333" 
+  },
+  suggestion: { 
+    fontSize: 14, 
+    color: "#666", 
+    textAlign: "center" 
+  },
+  hint: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  hintText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  hintSubtext: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+  },
 });

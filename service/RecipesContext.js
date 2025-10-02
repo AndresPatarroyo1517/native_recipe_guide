@@ -151,10 +151,39 @@ export const RecipesProvider = ({ children }) => {
     );
   };
 
-  // NUEVA FUNCIÓN: Obtener receta por ID
+  // Obtener receta por ID
   const getRecipeById = (id) => {
     const idStr = id.toString();
     return allRecipes.find((recipe) => recipe.id.toString() === idStr);
+  };
+
+  // NUEVA FUNCIÓN: Buscar recetas en ambas fuentes
+  const searchRecipes = (query) => {
+    if (!query || query.trim().length === 0) {
+      return [];
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+
+    // Buscar en recetas personalizadas (Firestore)
+    const customResults = customRecipes.filter((recipe) => {
+      const titleMatch = recipe.title.toLowerCase().includes(searchTerm);
+      const ingredientsMatch = recipe.ingredients?.some((ing) =>
+        ing.toLowerCase().includes(searchTerm)
+      );
+      return titleMatch || ingredientsMatch;
+    });
+
+    // Buscar en recetas de API (solo por título, ya que no tenemos ingredientes cargados)
+    const apiResults = recipes.filter((recipe) =>
+      recipe.title.toLowerCase().includes(searchTerm)
+    );
+
+    // Combinar resultados y agregar estado de favorito
+    return [...customResults, ...apiResults].map((recipe) => ({
+      ...recipe,
+      favorite: favoriteIds.includes(recipe.id.toString()),
+    }));
   };
 
   return (
@@ -165,7 +194,8 @@ export const RecipesProvider = ({ children }) => {
         addRecipes,
         handleRate,
         handleToggleFavorite,
-        getRecipeById, // Nueva función exportada
+        getRecipeById,
+        searchRecipes, // Nueva función de búsqueda
         loading,
       }}
     >
